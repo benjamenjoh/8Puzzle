@@ -16,6 +16,7 @@ public class Board {
     private int hammingCount;
     private int manhattanCount;
 
+
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
@@ -27,6 +28,8 @@ public class Board {
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
                 boardTiles[i][j] = tiles[i][j];
+        hammingCount = hamming();
+        manhattanCount = manhattan();
     }
 
     // string representation of this board
@@ -86,6 +89,7 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
+        if (y == null) return false;
         if (y.getClass() != this.getClass()) return false;
         Board boardY = (Board) y;
         if (this.dimension() != boardY.dimension()) return false;
@@ -101,31 +105,34 @@ public class Board {
     public Iterable<Board> neighbors() {
         Queue<Board> boards = new Queue<Board>();
         int[] rowColSpacetile = locateSpacetile(this);
+        if (rowColSpacetile == null)
+            return boards; // houston, we have a problem (if we don't have an "open" tile space)
+
         int row = rowColSpacetile[0];
         int col = rowColSpacetile[1];
 
         // check North
         if (row > 0) {
             Board nBoard = new Board(this.boardTiles);
-            nBoard.swapTiles(nBoard.boardTiles, row, col, row - 1, col);
+            nBoard.swapTiles(nBoard, row, col, row - 1, col);
             boards.enqueue(nBoard);
         }
         // check South
         if (row < dimension() - 1) {
             Board sBoard = new Board(this.boardTiles);
-            sBoard.swapTiles(sBoard.boardTiles, row, col, row + 1, col);
+            sBoard.swapTiles(sBoard, row, col, row + 1, col);
             boards.enqueue(sBoard);
         }
         // check West
         if (col > 0) {
             Board wBoard = new Board(this.boardTiles);
-            wBoard.swapTiles(wBoard.boardTiles, row, col - 1, row, col);
+            wBoard.swapTiles(wBoard, row, col - 1, row, col);
             boards.enqueue(wBoard);
         }
         // check East
         if (col < dimension() - 1) {
             Board eBoard = new Board(this.boardTiles);
-            eBoard.swapTiles(eBoard.boardTiles, row, col + 1, row, col);
+            eBoard.swapTiles(eBoard, row, col + 1, row, col);
             boards.enqueue(eBoard);
         }
 
@@ -135,27 +142,27 @@ public class Board {
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
 
-        int[][] twinArray = new int[n][n];
-        boolean swapComplete = false;
+        // int[][] twinArray = new int[n][n];
+        Board twinBoard = new Board(new int[n][n]);
         int row1 = -1;
         int col1 = -1;
         int row2 = -1;
         int col2 = -1;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                twinArray[i][j] = boardTiles[i][j];
-                if ((row1 < 0) && (col1 < 0) && (twinArray[i][j] != 0)) {
+                twinBoard.boardTiles[i][j] = boardTiles[i][j];
+                if ((row1 < 0) && (col1 < 0) && (twinBoard.boardTiles[i][j] != 0)) {
                     row1 = i;
                     col1 = j;
                 }
-                if ((row1 >= 0) && (col1 >= 0) && (twinArray[i][j] != 0)) {
+                if ((row1 >= 0) && (col1 >= 0) && (twinBoard.boardTiles[i][j] != 0)) {
                     row2 = i;
                     col2 = j;
                 }
             }
         }
-        swapTiles(twinArray, row1, col1, row2, col2);
-        return new Board(twinArray);
+        swapTiles(twinBoard, row1, col1, row2, col2);
+        return twinBoard;
     }
 
     private int[] locateSpacetile(Board board) {
@@ -165,19 +172,23 @@ public class Board {
         return null; // not bullet-proof, but should not happen with our clean inputs...
     }
 
-    private void swapTiles(int[][] tileSet, int row1, int col1, int row2, int col2) {
-        int tmp = tileSet[row1][col1];
-        tileSet[row1][col1] = tileSet[row2][col2];
-        tileSet[row2][col2] = tmp;
+    private void swapTiles(Board b, int row1, int col1, int row2, int col2) {
+        int tmp = b.boardTiles[row1][col1];
+        b.boardTiles[row1][col1] = b.boardTiles[row2][col2];
+        b.boardTiles[row2][col2] = tmp;
+        hammingCount = -1;
+        manhattanCount = -1;
+        hammingCount = hamming();
+        manhattanCount = manhattan(); // reset
     }
 
     // unit testing (not graded)
     public static void main(String[] args) {
         // read in the board specified in the filename
-        // puzzle3x3-00.txt
+
         // args[0] = "puzzle3x3-04.txt"; // todo: DELETE ME later
-        // args[0] = "puzzle3x3-00.txt"; // todo: DELETE ME later
-        args[0] = "puzzle3x3-19.txt"; // todo: DELETE ME later
+        args[0] = "puzzle3x3-00.txt"; // todo: DELETE ME later
+        // args[0] = "puzzle3x3-19.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-18.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-BenJ.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-07.txt"; // todo: DELETE ME later
