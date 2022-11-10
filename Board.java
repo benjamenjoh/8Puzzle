@@ -5,6 +5,7 @@
  **************************************************************************** */
 
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.Arrays;
@@ -12,10 +13,15 @@ import java.util.Arrays;
 public class Board {
     private int[][] boardTiles;
     private int n;
+    private int hammingCount;
+    private int manhattanCount;
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
+        hammingCount = -1;
+        manhattanCount = -1;
+
         n = tiles.length;
         boardTiles = new int[n][n];
         for (int i = 0; i < n; i++)
@@ -44,7 +50,8 @@ public class Board {
 
     // number of tiles out of place
     public int hamming() {
-        int hammingCount = 0;
+        if (hammingCount >= 0) return hammingCount; // return cached value
+        hammingCount = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (boardTiles[i][j] == 0) continue;
@@ -57,7 +64,8 @@ public class Board {
     // sum of Manhattan distances between tiles and goal
     public int manhattan() {
         // int[][] TEST = new int[3][3];
-        int manhattanCount = 0;
+        if (manhattanCount >= 0) return manhattanCount; // return cached value
+        manhattanCount = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (boardTiles[i][j] == 0) continue;
@@ -80,6 +88,7 @@ public class Board {
     public boolean equals(Object y) {
         if (y.getClass() != this.getClass()) return false;
         Board boardY = (Board) y;
+        if (this.dimension() != boardY.dimension()) return false;
         return Arrays.deepEquals(this.boardTiles, boardY.boardTiles);
         /*
         for (int i = 0; i < n; i++)
@@ -90,7 +99,37 @@ public class Board {
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
-        return null;
+        Queue<Board> boards = new Queue<Board>();
+        int[] rowColSpacetile = locateSpacetile(this);
+        int row = rowColSpacetile[0];
+        int col = rowColSpacetile[1];
+
+        // check North
+        if (row > 0) {
+            Board nBoard = new Board(this.boardTiles);
+            nBoard.swapTiles(nBoard.boardTiles, row, col, row - 1, col);
+            boards.enqueue(nBoard);
+        }
+        // check South
+        if (row < dimension() - 1) {
+            Board sBoard = new Board(this.boardTiles);
+            sBoard.swapTiles(sBoard.boardTiles, row, col, row + 1, col);
+            boards.enqueue(sBoard);
+        }
+        // check West
+        if (col > 0) {
+            Board wBoard = new Board(this.boardTiles);
+            wBoard.swapTiles(wBoard.boardTiles, row, col - 1, row, col);
+            boards.enqueue(wBoard);
+        }
+        // check East
+        if (col < dimension() - 1) {
+            Board eBoard = new Board(this.boardTiles);
+            eBoard.swapTiles(eBoard.boardTiles, row, col + 1, row, col);
+            boards.enqueue(eBoard);
+        }
+
+        return boards;
     }
 
     // a board that is obtained by exchanging any pair of tiles
@@ -115,10 +154,21 @@ public class Board {
                 }
             }
         }
-        int tmp = twinArray[row1][col1];
-        twinArray[row1][col1] = twinArray[row2][col2];
-        twinArray[row2][col2] = tmp;
+        swapTiles(twinArray, row1, col1, row2, col2);
         return new Board(twinArray);
+    }
+
+    private int[] locateSpacetile(Board board) {
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (board.boardTiles[i][j] == 0) return new int[] { i, j };
+        return null; // not bullet-proof, but should not happen with our clean inputs...
+    }
+
+    private void swapTiles(int[][] tileSet, int row1, int col1, int row2, int col2) {
+        int tmp = tileSet[row1][col1];
+        tileSet[row1][col1] = tileSet[row2][col2];
+        tileSet[row2][col2] = tmp;
     }
 
     // unit testing (not graded)
@@ -127,10 +177,11 @@ public class Board {
         // puzzle3x3-00.txt
         // args[0] = "puzzle3x3-04.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-00.txt"; // todo: DELETE ME later
-        // args[0] = "puzzle3x3-19.txt"; // todo: DELETE ME later
+        args[0] = "puzzle3x3-19.txt"; // todo: DELETE ME later
+        // args[0] = "puzzle3x3-18.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-BenJ.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-07.txt"; // todo: DELETE ME later
-        args[0] = "puzzle4x4-01.txt"; // todo: DELETE ME later
+        // args[0] = "puzzle4x4-01.txt"; // todo: DELETE ME later
         for (String filename : args) {
             In in = new In(filename);
             int n = in.readInt();
@@ -153,6 +204,11 @@ public class Board {
 
             StdOut.println("Hamming: " + String.valueOf(initial.hamming()));
             StdOut.println("Manhatten: " + String.valueOf(initial.manhattan()));
+
+            Iterable<Board> neighborBoards = initial.neighbors();
+            for (Board neighbor : neighborBoards) {
+                StdOut.println("Neighbor: " + neighbor.toString());
+            }
         }
     }
 }
