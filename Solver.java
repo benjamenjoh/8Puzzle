@@ -16,23 +16,22 @@ public class Solver {
 
     private int totalMoves;
     // private int priority;
-    private Board initialBoard;
-    private MinPQ<SearchNode> mPQ;
+    private boolean solveable;
 
-    Queue<Board> gameTree;
+    private Queue<Board> gameTree;
 
     private class SearchNode {
         private Board searchBoard;
-        private Board prevBoard;
+        // private Board prevBoard;
         private int moveCount;
-        private int hammingVal;
+        // private int hammingVal;
         private int manhattanVal;
 
         private SearchNode(Board search, Board prev, int moves) {
             searchBoard = search;
-            prevBoard = prev;
+            // prevBoard = prev;
             moveCount = moves;
-            hammingVal = search.hamming();
+            // hammingVal = search.hamming();
             manhattanVal = search.manhattan();
         }
 
@@ -52,30 +51,39 @@ public class Solver {
         public int compare(SearchNode a, SearchNode b) {
             int priManA = a.manhattanVal + a.moves();
             int priManB = b.manhattanVal + b.moves();
-            int priHamA = a.hammingVal + a.moves();
-            int priHamB = b.hammingVal + b.moves();
+            // int priHamA = a.hammingVal + a.moves();
+            // int priHamB = b.hammingVal + b.moves();
 
-            if (priManA < priManB) return -1;
-            if (priManA > priManB) return 1;
+            // if (priManA < priManB) return -1;
+            // if (priManA > priManB) return 1;
             // priManA == priManB
-            return Integer.compare(priHamA, priHamB);
+            return Integer.compare(priManA, priManB);
         }
     }
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+        solveable = true;
         if (initial == null) throw new IllegalArgumentException();
+        // initial = initial.twin(); // todo: remove!
         gameTree = new Queue<Board>();
         totalMoves = 0;
-        initialBoard = initial;
-        mPQ = new MinPQ<SearchNode>(new NodeComparator());
+        // initialBoard = initial;
+        // private Board initialBoard;
+        MinPQ<SearchNode> mPQ = new MinPQ<SearchNode>(new NodeComparator());
         // gameTree.enqueue(initial);
         // mPQ.insert(initial);
         mPQ.insert(new SearchNode(initial, null, 0));
         while (true) {
 
             // Board minB = mPQ.delMin();
+            if (mPQ.isEmpty()) {
+                totalMoves = -1;
+                solveable = false;
+                return;
+            }
             SearchNode minNode = mPQ.delMin();
+
             gameTree.enqueue(minNode.searchBoard);
             if (minNode.searchBoard.isGoal()) {
                 totalMoves = minNode.moves();
@@ -108,7 +116,9 @@ public class Solver {
 
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
-        return true;
+        // Board twin = initialBoard.twin();
+        // Solver twinSolver = new Solver(twin);
+        return solveable;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
@@ -130,10 +140,11 @@ public class Solver {
         // args[0] = "puzzle3x3-19.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-18.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-BenJ.txt"; // todo: DELETE ME later
-        args[0] = "puzzle3x3-31.txt"; // todo: DELETE ME later
-        // args[0] = "puzzle4x4-01.txt"; // todo: DELETE ME later
+        // args[0] = "puzzle3x3-31.txt"; // todo: DELETE ME later
+        args[0] = "puzzle4x4-01.txt"; // todo: DELETE ME later
         // args[0] = "puzzle2x2-01.txt"; // todo: DELETE ME later 1-off
         // args[0] = "puzzle2x2-06.txt"; // todo: DELETE ME later 1-off
+        // args[0] = "puzzle2x2-unsolvable2.txt"; // todo: DELETE ME later 1-off
 
         // create initial board from file
         In in = new In(args[0]);
