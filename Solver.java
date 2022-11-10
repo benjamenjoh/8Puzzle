@@ -50,7 +50,7 @@ public class Solver {
             gameTree.enqueue(minB);
             if (minB.isGoal()) break;
             moves++;
-
+            if (moves > 100) break; // TODO: remove
             Iterable<Board> neighbors = minB.neighbors();
             for (Board nb : neighbors) {
                 boolean uniqueBoard = true;
