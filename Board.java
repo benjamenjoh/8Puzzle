@@ -13,23 +13,23 @@ import java.util.Arrays;
 public class Board {
     private int[][] boardTiles;
     private int n;
-    private int hammingCount;
-    private int manhattanCount;
+    // private int hammingCount;
+    // private int manhattanCount;
 
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
-        hammingCount = -1;
-        manhattanCount = -1;
+        // hammingCount = -1;
+        // manhattanCount = -1;
 
         n = tiles.length;
         boardTiles = new int[n][n];
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
                 boardTiles[i][j] = tiles[i][j];
-        hammingCount = hamming();
-        manhattanCount = manhattan();
+        // hammingCount = hamming();
+        // manhattanCount = manhattan();
     }
 
     // string representation of this board
@@ -53,8 +53,8 @@ public class Board {
 
     // number of tiles out of place
     public int hamming() {
-        if (hammingCount >= 0) return hammingCount; // return cached value
-        hammingCount = 0;
+        // if (hammingCount >= 0) return hammingCount; // return cached value
+        int hammingCount = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (boardTiles[i][j] == 0) continue;
@@ -67,8 +67,8 @@ public class Board {
     // sum of Manhattan distances between tiles and goal
     public int manhattan() {
         // int[][] TEST = new int[3][3];
-        if (manhattanCount >= 0) return manhattanCount; // return cached value
-        manhattanCount = 0;
+        // if (manhattanCount >= 0) return manhattanCount; // return cached value
+        int manhattanCount = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (boardTiles[i][j] == 0) continue;
@@ -176,10 +176,10 @@ public class Board {
         int tmp = b.boardTiles[row1][col1];
         b.boardTiles[row1][col1] = b.boardTiles[row2][col2];
         b.boardTiles[row2][col2] = tmp;
-        hammingCount = -1;
+        /* hammingCount = -1;
         manhattanCount = -1;
         hammingCount = hamming();
-        manhattanCount = manhattan(); // reset
+        manhattanCount = manhattan(); // reset*/
     }
 
     // unit testing (not graded)
@@ -187,7 +187,7 @@ public class Board {
         // read in the board specified in the filename
 
         // args[0] = "puzzle3x3-04.txt"; // todo: DELETE ME later
-        args[0] = "puzzle3x3-00.txt"; // todo: DELETE ME later
+        args[0] = "puzzle3x3-02.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-19.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-18.txt"; // todo: DELETE ME later
         // args[0] = "puzzle3x3-BenJ.txt"; // todo: DELETE ME later
